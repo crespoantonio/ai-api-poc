@@ -3,9 +3,10 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import pool from '../database/db';
 import { User } from '../models/user';
-import { queries } from '../queries/authQueries';
+import { authQueries } from '../queries/authQueries';
 import logger from '../logger';
 import jwt from 'jsonwebtoken';
+import { rolQueries } from '../queries/rolQueries';
 
 // Regular expression for validating email addresses
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,7 +35,7 @@ export const registerUser = async (req: Request, res: Response) => {
         await client.query('BEGIN'); // Begin transaction
 
         // Check if email or username already exists
-        const existingUser = await client.query(queries.checkExistingUser, [email, username]);
+        const existingUser = await client.query(authQueries.checkExistingUser, [email, username]);
         if (existingUser.rows.length > 0) {
             logger.error('Email or username already exists:', { email, username });
             return res.status(400).json({ message: 'Email or username already exists' });
@@ -44,7 +45,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert user into database
-        const newUser = await client.query(queries.insertUser, [name,lastName, email, username, hashedPassword]);
+        const newUser = await client.query(authQueries.insertUser, [name,lastName, email, username, hashedPassword]);
 
         await client.query('COMMIT'); // Commit transaction
         logger.info('User registered successfully:', { email, username });
@@ -64,7 +65,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     try {
         // Find user by username
-        const user = await pool.query(queries.selectUserByUsername, [username]);
+        const user = await pool.query(authQueries.selectUserByUsername, [username]);
         if (user.rows.length === 0) {
             logger.error('Invalid credentials');
             return res.status(400).json({ message: 'Invalid credentials' });
@@ -77,9 +78,16 @@ export const loginUser = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
+        // Fetch user roles from the database
+        const roles = await pool.query(rolQueries.selectUserRolesByUsername, [username]);
+
         // Generate JWT token
         const token = jwt.sign(
-            { userId: user.rows[0].id, username: user.rows[0].username }, 
+            { 
+                userId: user.rows[0].id, 
+                username: user.rows[0].username,
+                roles: roles.rows.map(role => role.name) // Add roles to the token
+            }, 
             process.env.JWT_SECRET!, 
             { expiresIn: '1h' }
         );

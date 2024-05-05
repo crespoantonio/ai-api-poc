@@ -1,13 +1,12 @@
 // src/routes/rolRoutes.ts
 import express from 'express';
 import authMiddleware from '../middleware/authMiddleware';
-import { createRole, getAllRoles, assignRole, removeRole } from '../controllers/roleController';
+import { getAllRoles, assignRoleToUser, removeRoleToUser } from '../controllers/roleController';
 
 const router = express.Router();
 
-router.post('/roles', authMiddleware, createRole);
-router.get('/roles', authMiddleware, getAllRoles);
-router.post('/users/:userId/roles/:roleId', authMiddleware, assignRole);
-router.delete('/users/:userId/roles/:roleId', authMiddleware, removeRole);
+router.get('/getAll', authMiddleware, getAllRoles);
+router.post('/assignRole', authMiddleware, assignRoleToUser);
+router.delete('/deleteRole', authMiddleware, removeRoleToUser);
 
 export default router;

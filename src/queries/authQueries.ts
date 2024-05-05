@@ -1,4 +1,4 @@
-export const queries = {
+export const authQueries = {
     checkExistingUser: 'SELECT * FROM users WHERE email = $1 OR username = $2',
     insertUser: 'INSERT INTO users (name, lastName, email, username, password) VALUES ($1, $2, $3, $4, $5) RETURNING id',
     selectRoleId: 'SELECT id FROM roles WHERE name = $1',
