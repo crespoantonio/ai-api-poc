@@ -27,6 +27,3 @@ The project also involved comparing the performance of ChatGPT with Google's AI 
 
 ## Conclusion
 The AI-driven API development project showcases the potential of leveraging AI, particularly ChatGPT, in assisting with software development tasks. While challenges exist, the results demonstrate promising capabilities and suggest opportunities for further exploration and refinement in AI-driven development processes. 
-
-## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
